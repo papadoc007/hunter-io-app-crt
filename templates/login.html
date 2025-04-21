@@ -6,6 +6,7 @@
     <title>התחברות - חיפוש Hunter.io</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     <div class="auth-container">
@@ -20,6 +21,15 @@
                     {% endfor %}
                 {% endif %}
             {% endwith %}
+            
+            <div class="social-login">
+                <a href="{{ url_for('login_with_google') }}" class="google-btn">
+                    <i class="fab fa-google"></i> התחבר עם Google
+                </a>
+                <div class="or-divider">
+                    <span>או</span>
+                </div>
+            </div>
 
             <form method="POST" action="{{ url_for('login') }}">
                 {{ form.hidden_tag() }}

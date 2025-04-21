@@ -13,6 +13,11 @@
     }
   ],
   "env": {
-    "HUNTER_API_KEY": "@hunter_api_key"
+    "HUNTER_API_KEY": "@hunter_api_key",
+    "SECRET_KEY": "@secret_key",
+    "ADMIN_EMAIL": "@admin_email",
+    "ADMIN_PASSWORD": "@admin_password",
+    "GOOGLE_CLIENT_ID": "@google_client_id",
+    "GOOGLE_CLIENT_SECRET": "@google_client_secret"
   }
 } 

@@ -18,6 +18,10 @@ from PIL import Image
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
+from flask_dance.contrib.google import make_google_blueprint, google
+from flask_dance.consumer.storage.sqla import OAuthConsumerMixin, SQLAlchemyStorage
+from flask_dance.consumer import oauth_authorized
+from sqlalchemy.orm.exc import NoResultFound
 
 # טעינת משתני סביבה מקובץ .env
 load_dotenv()
@@ -40,16 +44,17 @@ db = SQLAlchemy(app)
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)
+    password_hash = db.Column(db.String(200), nullable=True)  # Nullable for OAuth users
     otp_secret = db.Column(db.String(32))
     otp_enabled = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default=False)
+    google_id = db.Column(db.String(100), unique=True, nullable=True)  # Google User ID
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
         
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return self.password_hash and check_password_hash(self.password_hash, password)
     
     def get_otp_uri(self):
         return pyotp.totp.TOTP(self.otp_secret).provisioning_uri(
@@ -59,6 +64,11 @@ class User(UserMixin, db.Model):
     
     def verify_otp(self, otp):
         return pyotp.TOTP(self.otp_secret).verify(otp)
+
+# OAuth models
+class OAuth(OAuthConsumerMixin, db.Model):
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    user = db.relationship(User)
 
 # מודל לשמירת היסטוריית חיפושים
 class SearchHistory(db.Model):
@@ -129,6 +139,19 @@ with app.app_context():
         db.session.add(admin_user)
         db.session.commit()
         print(f"משתמש מנהל נוצר: {admin_email}")
+
+# הגדרת Blueprint לגוגל
+google_blueprint = make_google_blueprint(
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    scope=["profile", "email"],
+    redirect_url="/google-login/authorized"
+)
+
+app.register_blueprint(google_blueprint, url_prefix="/google-login")
+
+# הגדרת אחסון OAuth
+google_blueprint.storage = SQLAlchemyStorage(OAuth, db.session, user=current_user)
 
 # ניתוב ראשי - מעבר לדף הבית אם המשתמש מחובר, אחרת מעבר לדף ההתחברות
 @app.route('/')
@@ -322,6 +345,77 @@ def get_history_item(history_id):
 def admin_users():
     users = User.query.all()
     return render_template('admin_users.html', users=users)
+
+# ניתוב חדש להתחברות עם גוגל
+@app.route('/login-with-google')
+def login_with_google():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    
+    return redirect(url_for('google.login'))
+
+@oauth_authorized.connect_via(google_blueprint)
+def google_logged_in(blueprint, token):
+    if not token:
+        flash('התחברות עם גוגל נכשלה.', 'danger')
+        return False
+    
+    resp = google.get('/oauth2/v1/userinfo')
+    if not resp.ok:
+        flash('לא ניתן לקבל פרטי משתמש מגוגל.', 'danger')
+        return False
+    
+    google_info = resp.json()
+    google_user_id = google_info["id"]
+    google_email = google_info["email"]
+    
+    # בדיקת דומיין
+    domain = google_email.split('@')[-1]
+    if domain != app.config['ALLOWED_DOMAIN'] and google_email != app.config['ADMIN_EMAIL']:
+        flash(f'רק כתובות אימייל מהדומיין {app.config["ALLOWED_DOMAIN"]} מורשות להירשם.', 'danger')
+        return False
+    
+    # בדיקה אם המשתמש כבר קיים
+    try:
+        oauth = OAuth.query.filter_by(
+            provider=blueprint.name,
+            provider_user_id=google_user_id,
+        ).one()
+    except NoResultFound:
+        # לא נמצא ברשומות OAuth, בדיקה לפי אימייל
+        user = User.query.filter_by(email=google_email).first()
+        if not user:
+            # יצירת משתמש חדש
+            user = User(email=google_email, google_id=google_user_id)
+            user.otp_secret = pyotp.random_base32()
+            
+            # אם זה המייל של המנהל, הופך אותו למנהל
+            if user.email == app.config['ADMIN_EMAIL']:
+                user.is_admin = True
+                
+            db.session.add(user)
+            db.session.commit()
+        else:
+            # קישור המשתמש הקיים עם חשבון גוגל
+            user.google_id = google_user_id
+            db.session.commit()
+        
+        # יצירת רשומת OAuth חדשה
+        oauth = OAuth(
+            provider=blueprint.name,
+            provider_user_id=google_user_id,
+            token=token,
+            user_id=user.id,
+        )
+        db.session.add(oauth)
+        db.session.commit()
+    else:
+        user = oauth.user
+    
+    # התחברות המשתמש
+    login_user(user)
+    flash('התחברת בהצלחה עם גוגל!', 'success')
+    return False  # מניעת הפעלה אוטומטית של הפעולה
 
 if __name__ == '__main__':
     app.run(debug=True) 
