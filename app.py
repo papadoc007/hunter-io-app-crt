@@ -286,6 +286,15 @@ def search():
         response = requests.get('https://api.hunter.io/v2/domain-search', params=params)
         results = response.json()
         
+        # סינון תוצאות רק לתוצאות אמיתיות (ללא התחשבות בציון האמינות)
+        if 'data' in results and 'emails' in results['data']:
+            # שמירה רק על אימיילים אמיתיים
+            verified_emails = [email for email in results['data']['emails'] if email.get('verification', {}).get('status') == 'valid']
+            results['data']['emails'] = verified_emails
+            # עדכון מספר התוצאות
+            if 'meta' in results['data']:
+                results['data']['meta']['results'] = len(verified_emails)
+        
         # שמירת תוצאות החיפוש בהיסטוריה
         search_record = SearchHistory(
             user_id=current_user.id,

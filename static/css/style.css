@@ -297,15 +297,23 @@ header h1 {
 }
 
 .alert-danger {
-    background-color: #ffecec;
-    color: var(--danger-color);
-    border: 1px solid var(--danger-color);
+    background-color: #ffebee;
+    border-color: #f44336;
+    color: #b71c1c;
 }
 
 .alert-warning {
-    background-color: #fef9e7;
-    color: var(--warning-color);
-    border: 1px solid var(--warning-color);
+    background-color: #fff8e1;
+    border-color: #ffc107;
+    color: #ff6f00;
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    color: #0d47a1;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
 }
 
 /* תוצאות */
