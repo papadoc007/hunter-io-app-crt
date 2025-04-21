@@ -9,11 +9,8 @@ def catch_all(path):
     return "האפליקציה של Hunter.io עובדת!"
 
 # Vercel Serverless Function Handler
-def handler(event, context):
-    return {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "text/html; charset=utf-8"
-        },
-        "body": "האפליקציה של Hunter.io עובדת!"
-    } 
+def handler(request, response):
+    response.status_code = 200
+    response.set_header("Content-Type", "text/html; charset=utf-8")
+    response.body = "האפליקציה של Hunter.io עובדת!"
+    return response 
