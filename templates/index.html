@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חיפוש Hunter.io</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>חיפוש מידע באמצעות Hunter.io</h1>
+            <p>חיפוש והצגת כתובות אימייל לפי דומיין וחברה</p>
+        </header>
+
+        <div class="navbar">
+            <a href="{{ url_for('index') }}" class="nav-link active">חיפוש</a>
+            <a href="{{ url_for('profile') }}" class="nav-link">פרופיל</a>
+            {% if current_user.is_admin %}
+            <a href="{{ url_for('admin_users') }}" class="nav-link">ניהול משתמשים</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}" class="nav-link logout">התנתק</a>
+        </div>
+
+        <div class="user-greeting">
+            <p>שלום, <strong>{{ current_user.email }}</strong></p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="search-tab">חיפוש</button>
+            <button class="tab-btn" data-tab="history-tab">היסטוריה</button>
+        </div>
+
+        <div id="search-tab" class="tab-content active">
+            <div class="search-form">
+                <div class="form-group">
+                    <label for="domain">דומיין *</label>
+                    <input type="text" id="domain" placeholder="לדוגמה: crt-imp.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="company">שם חברה (אופציונלי)</label>
+                    <input type="text" id="company" placeholder="לדוגמה: Google">
+                </div>
+
+                <button id="search-btn" class="primary-btn">חפש</button>
+            </div>
+
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>מחפש נתונים...</p>
+            </div>
+
+            <div id="api-key-error" class="error-message hidden">
+                <p>נראה שאין מפתח API תקף. אנא וודא שקובץ .env מכיל מפתח API תקף.</p>
+                <p>צור קובץ .env בתיקיית הפרויקט עם התוכן הבא:</p>
+                <pre>HUNTER_API_KEY=YOUR_API_KEY_HERE</pre>
+            </div>
+
+            <div id="results" class="results-container hidden">
+                <h2>תוצאות החיפוש</h2>
+                <div class="domain-info">
+                    <div class="info-item">
+                        <span class="label">דומיין:</span>
+                        <span id="result-domain" class="value"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">שם חברה:</span>
+                        <span id="result-organization" class="value"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">סך הכל:</span>
+                        <span id="result-total" class="value"></span>
+                    </div>
+                </div>
+
+                <div id="emails-container">
+                    <h3>כתובות אימייל</h3>
+                    <div id="emails-list" class="emails-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="history-tab" class="tab-content">
+            <h2>היסטוריית חיפושים</h2>
+            <div id="history-container">
+                <p class="loading-history">טוען היסטוריה...</p>
+                <ul id="history-list" class="history-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- תבנית לפריט ברשימת אימיילים -->
+    <template id="email-item-template">
+        <div class="email-item">
+            <div class="email-info">
+                <div class="email-value"></div>
+                <div class="person-details">
+                    <span class="person-name"></span>
+                    <span class="person-position"></span>
+                </div>
+            </div>
+            <div class="email-confidence">
+                <div class="confidence-bar">
+                    <div class="confidence-level"></div>
+                </div>
+                <span class="confidence-value"></span>
+            </div>
+        </div>
+    </template>
+
+    <!-- תבנית לפריט בהיסטוריית החיפושים -->
+    <template id="history-item-template">
+        <li class="history-item">
+            <div class="history-header">
+                <div class="history-domain"></div>
+                <div class="history-date"></div>
+            </div>
+            <div class="history-company"></div>
+            <button class="view-btn">הצג תוצאות</button>
+        </li>
+    </template>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html> 

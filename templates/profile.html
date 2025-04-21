@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>פרופיל - חיפוש Hunter.io</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>פרופיל משתמש</h1>
+            <p>ניהול הגדרות החשבון שלך</p>
+        </header>
+
+        <div class="navbar">
+            <a href="{{ url_for('index') }}" class="nav-link">חיפוש</a>
+            <a href="{{ url_for('profile') }}" class="nav-link active">פרופיל</a>
+            {% if current_user.is_admin %}
+            <a href="{{ url_for('admin_users') }}" class="nav-link">ניהול משתמשים</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}" class="nav-link logout">התנתק</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="profile-container">
+            <div class="profile-section">
+                <h2>פרטי חשבון</h2>
+                <div class="profile-info">
+                    <div class="info-group">
+                        <label>כתובת אימייל</label>
+                        <p>{{ current_user.email }}</p>
+                    </div>
+                    <div class="info-group">
+                        <label>סוג חשבון</label>
+                        <p>{% if current_user.is_admin %}מנהל{% else %}משתמש רגיל{% endif %}</p>
+                    </div>
+                    <div class="info-group">
+                        <label>אימות דו-שלבי</label>
+                        <p>
+                            {% if current_user.otp_enabled %}
+                            <span class="status-enabled">מופעל</span>
+                            {% else %}
+                            <span class="status-disabled">לא מופעל</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h2>אבטחה</h2>
+                <div class="security-settings">
+                    <div class="setting-group">
+                        <h3>אימות דו-שלבי (2FA)</h3>
+                        <p>אימות דו-שלבי מספק שכבת אבטחה נוספת לחשבונך.</p>
+                        
+                        {% if current_user.otp_enabled %}
+                        <p class="setting-status">סטטוס: <span class="status-enabled">מופעל</span></p>
+                        <p>לביטול אימות דו-שלבי, אנא פנה למנהל המערכת.</p>
+                        {% else %}
+                        <p class="setting-status">סטטוס: <span class="status-disabled">לא מופעל</span></p>
+                        <a href="{{ url_for('setup_2fa') }}" class="primary-btn">הפעל אימות דו-שלבי</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

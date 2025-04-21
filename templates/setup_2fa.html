@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הגדרת אימות דו-שלבי - חיפוש Hunter.io</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>הגדרת אימות דו-שלבי</h1>
+            <p>הוסף שכבת אבטחה נוספת לחשבונך</p>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="setup-2fa-container">
+            <div class="setup-2fa-steps">
+                <div class="step">
+                    <h3>1. סרוק את קוד ה-QR</h3>
+                    <p>סרוק את הקוד הבא באמצעות אפליקציית האימות שלך (כגון Google Authenticator):</p>
+                    <div class="qr-code">
+                        <img src="{{ img_str }}" alt="קוד QR לאימות דו-שלבי">
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <h3>2. הזן את הקוד שקיבלת</h3>
+                    <p>הזן את הקוד בן 6 הספרות שמופיע באפליקציית האימות:</p>
+                    
+                    <form method="POST" action="{{ url_for('setup_2fa') }}">
+                        <div class="form-group">
+                            <input type="text" name="otp" class="form-control" placeholder="123456" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="primary-btn">אמת והפעל 2FA</button>
+                            <a href="{{ url_for('profile') }}" class="secondary-btn">ביטול</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="setup-2fa-info">
+                <h3>מידע חשוב</h3>
+                <p>לאחר הפעלת אימות דו-שלבי, תידרש להזין קוד אימות בכל התחברות לחשבונך.</p>
+                <p>אנא ודא שיש לך גישה לאפליקציית האימות. אם תאבד גישה לאפליקציה, לא תוכל להתחבר לחשבונך.</p>
+                <p>אפליקציות אימות מומלצות:</p>
+                <ul>
+                    <li>Google Authenticator</li>
+                    <li>Microsoft Authenticator</li>
+                    <li>Authy</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

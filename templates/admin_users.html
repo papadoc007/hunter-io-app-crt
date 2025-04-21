@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול משתמשים - חיפוש Hunter.io</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ניהול משתמשים</h1>
+            <p>ניהול משתמשים במערכת (גישת מנהל בלבד)</p>
+        </header>
+
+        <div class="navbar">
+            <a href="{{ url_for('index') }}" class="nav-link">חיפוש</a>
+            <a href="{{ url_for('profile') }}" class="nav-link">פרופיל</a>
+            <a href="{{ url_for('admin_users') }}" class="nav-link active">ניהול משתמשים</a>
+            <a href="{{ url_for('logout') }}" class="nav-link logout">התנתק</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="admin-container">
+            <div class="users-list">
+                <h2>רשימת משתמשים</h2>
+                
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>כתובת אימייל</th>
+                            <th>סוג חשבון</th>
+                            <th>2FA</th>
+                            <th>פעולות</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{% if user.is_admin %}מנהל{% else %}משתמש רגיל{% endif %}</td>
+                            <td>
+                                {% if user.otp_enabled %}
+                                <span class="status-enabled">מופעל</span>
+                                {% else %}
+                                <span class="status-disabled">לא מופעל</span>
+                                {% endif %}
+                            </td>
+                            <td class="actions">
+                                <!-- לעתיד: להוסיף יכולת לאיפוס סיסמה או מחיקת משתמש -->
+                                <span class="placeholder-actions">פעולות בפיתוח</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="admin-stats">
+                <h2>סטטיסטיקות</h2>
+                <div class="stats-box">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ users|length }}</span>
+                        <span class="stat-label">סך הכל משתמשים</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ users|selectattr('is_admin', 'eq', true)|list|length }}</span>
+                        <span class="stat-label">מנהלים</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ users|selectattr('otp_enabled', 'eq', true)|list|length }}</span>
+                        <span class="stat-label">עם 2FA</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
