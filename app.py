@@ -418,4 +418,4 @@ def google_logged_in(blueprint, token):
     return False  # מניעת הפעלה אוטומטית של הפעולה
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True, host='127.0.0.1', port=5000) 
