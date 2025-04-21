@@ -12,6 +12,9 @@
     --dark-gray: #888;
     --border-radius: 8px;
     --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --dark-color: #2c3e50;
+    --light-color: #ecf0f1;
+    --bg-color: #f8f9fa;
 }
 
 * {
@@ -21,64 +24,66 @@
 }
 
 body {
-    font-family: 'Rubik', sans-serif;
-    background-color: #f9f9f9;
+    font-family: 'Rubik', 'Arial', sans-serif;
+    background-color: var(--bg-color);
     color: var(--text-color);
     line-height: 1.6;
+    direction: rtl;
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 20px;
 }
 
 header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 30px 0;
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 30px;
+    border-radius: 0 0 10px 10px;
 }
 
 header h1 {
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+header p {
+    margin: 10px 0 0;
+    font-size: 1.2rem;
+    opacity: 0.9;
 }
 
 /* אזור ניווט */
-.navbar {
+.nav {
     display: flex;
-    margin-bottom: 1.5rem;
+    justify-content: center;
     background-color: white;
-    border-radius: var(--border-radius);
-    padding: 0.5rem;
-    box-shadow: var(--shadow);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    overflow: hidden;
 }
 
-.nav-link {
-    padding: 0.75rem 1.5rem;
-    color: var(--dark-gray);
+.nav a {
+    padding: 15px 30px;
     text-decoration: none;
-    font-weight: 500;
-    border-radius: var(--border-radius);
-    transition: all 0.3s;
+    color: var(--dark-color);
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.3s ease;
 }
 
-.nav-link:hover {
-    background-color: var(--light-gray);
-    color: var(--primary-color);
+.nav a:hover {
+    background-color: rgba(52, 152, 219, 0.1);
 }
 
-.nav-link.active {
+.nav a.active {
     background-color: var(--primary-color);
     color: white;
-}
-
-.nav-link.logout {
-    margin-right: auto;
-    color: var(--danger-color);
-}
-
-.nav-link.logout:hover {
-    background-color: #ffecec;
 }
 
 /* ברכת משתמש */
@@ -179,27 +184,21 @@ header h1 {
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
+    margin-bottom: 5px;
+    font-weight: bold;
 }
 
 .form-group input {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--mid-gray);
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-    transition: border 0.3s;
-}
-
-.form-group input:focus {
-    outline: none;
-    border-color: var(--primary-color);
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
 }
 
 .form-control {
@@ -240,39 +239,36 @@ header h1 {
 
 /* טעינה */
 .loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 2rem 0;
+    text-align: center;
+    padding: 20px;
 }
 
 .spinner {
+    display: inline-block;
     width: 40px;
     height: 40px;
     border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: var(--primary-color);
     border-radius: 50%;
-    border-top-color: var(--primary-color);
     animation: spin 1s linear infinite;
-    margin-bottom: 1rem;
 }
 
 @keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
 }
 
 .hidden {
-    display: none !important;
+    display: none;
 }
 
 /* הודעות שגיאה */
 .error-message {
-    background-color: #ffecec;
-    color: #e74c3c;
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 1.5rem;
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--danger-color);
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--danger-color);
 }
 
 .error-message pre {
@@ -285,182 +281,130 @@ header h1 {
 
 /* הודעות התראה */
 .alert {
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 1rem;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
 }
 
 .alert-success {
-    background-color: #e8f8f5;
-    color: var(--secondary-dark);
-    border: 1px solid var(--secondary-color);
+    background-color: rgba(46, 204, 113, 0.1);
+    border-left: 4px solid var(--secondary-color);
+    color: var(--secondary-color);
 }
 
 .alert-danger {
-    background-color: #ffebee;
-    border-color: #f44336;
-    color: #b71c1c;
+    background-color: rgba(231, 76, 60, 0.1);
+    border-left: 4px solid var(--danger-color);
+    color: var(--danger-color);
 }
 
 .alert-warning {
-    background-color: #fff8e1;
-    border-color: #ffc107;
-    color: #ff6f00;
+    background-color: rgba(243, 156, 18, 0.1);
+    border-left: 4px solid var(--warning-color);
+    color: var(--warning-color);
 }
 
 .alert-info {
-    background-color: #e3f2fd;
-    border-color: #2196f3;
-    color: #0d47a1;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
+    background-color: rgba(52, 152, 219, 0.1);
+    border-left: 4px solid var(--primary-color);
+    color: var(--primary-color);
 }
 
 /* תוצאות */
 .results-container {
-    background-color: white;
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
+    margin-top: 30px;
 }
 
-.results-container h2 {
-    margin-bottom: 1.5rem;
-    color: var(--primary-color);
+.result-summary {
+    background-color: rgba(52, 152, 219, 0.1);
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
 }
 
-.domain-info {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    padding: 1rem;
-    background-color: var(--light-gray);
-    border-radius: var(--border-radius);
-    margin-bottom: 2rem;
+.result-row {
+    display: flex;
+    margin-bottom: 5px;
 }
 
-.info-item .label {
-    font-weight: 500;
-    margin-left: 0.5rem;
-}
-
-#emails-container h3 {
-    margin-bottom: 1rem;
+.result-label {
+    font-weight: bold;
+    width: 150px;
 }
 
 .emails-list {
-    display: grid;
-    gap: 1rem;
+    margin-top: 20px;
 }
 
 .email-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background-color: var(--light-gray);
-    border-radius: var(--border-radius);
-    transition: transform 0.2s;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: transform 0.2s ease;
 }
 
 .email-item:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-.email-info {
-    flex: 1;
-}
-
-.email-value {
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    color: var(--primary-color);
-}
-
-.person-details {
+.email-header {
     display: flex;
-    color: var(--dark-gray);
-    font-size: 0.9rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
-.person-name {
-    margin-left: 0.5rem;
-}
-
-.email-confidence {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    min-width: 100px;
+.person-info {
+    font-size: 14px;
+    color: #666;
 }
 
 .confidence-bar {
-    width: 100%;
-    height: 6px;
-    background-color: var(--mid-gray);
-    border-radius: 3px;
+    height: 8px;
+    background-color: #eee;
+    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 0.5rem;
+    margin-top: 10px;
 }
 
 .confidence-level {
     height: 100%;
     background-color: var(--secondary-color);
-}
-
-.confidence-value {
-    font-size: 0.8rem;
-    color: var(--dark-gray);
+    border-radius: 4px;
 }
 
 /* היסטוריה */
-.history-list {
-    list-style: none;
-}
-
 .history-item {
-    background-color: white;
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 1rem;
-}
-
-.history-header {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
     display: flex;
     justify-content: space-between;
-    margin-bottom: 0.5rem;
+    align-items: center;
+}
+
+.history-info {
+    flex: 1;
 }
 
 .history-domain {
-    font-weight: 500;
-    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 18px;
 }
 
 .history-date {
-    color: var(--dark-gray);
-    font-size: 0.9rem;
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
 }
 
 .history-company {
-    margin-bottom: 1rem;
-    color: var(--dark-gray);
-}
-
-.view-btn {
-    background-color: var(--light-gray);
-    border: none;
-    color: var(--primary-color);
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.3s;
-}
-
-.view-btn:hover {
-    background-color: var(--mid-gray);
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
 }
 
 /* עמודי התחברות והרשמה */

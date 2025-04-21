@@ -11,28 +11,28 @@
     <div class="container">
         <header>
             <h1>חיפוש מידע באמצעות Hunter.io</h1>
-            <p>חיפוש והצגת כתובות אימייל לפי דומיין וחברה</p>
+            <p>חיפוש והצגת כתובות אימייל אמיתיות לפי דומיין וחברה</p>
         </header>
 
         <div class="navbar">
-            <a href="{{ url_for('index') }}" class="nav-link active">חיפוש</a>
-            <a href="{{ url_for('profile') }}" class="nav-link">פרופיל</a>
-            {% if current_user.is_admin %}
-            <a href="{{ url_for('admin_users') }}" class="nav-link">ניהול משתמשים</a>
-            {% endif %}
-            <a href="{{ url_for('logout') }}" class="nav-link logout">התנתק</a>
+            <a href="#" class="nav-link active" id="search-nav">חיפוש</a>
+            <a href="#" class="nav-link" id="history-nav">היסטוריה</a>
+            <a href="#" class="nav-link" id="api-info-nav">מידע על API</a>
         </div>
 
-        <div class="user-greeting">
-            <p>שלום, <strong>{{ current_user.email }}</strong></p>
+        <div id="api-key-section" class="section">
+            <h2>מפתח API של Hunter.io</h2>
+            <div class="api-key-form">
+                <div class="form-group">
+                    <label for="api-key">מפתח API</label>
+                    <input type="text" id="api-key" placeholder="הזן את מפתח ה-API שלך מ-Hunter.io">
+                </div>
+                <button id="save-api-key" class="primary-btn">שמור מפתח</button>
+                <p class="help-text">המפתח יישמר בדפדפן שלך ולא יישלח לשום שרת אחר מלבד Hunter.io</p>
+            </div>
         </div>
 
-        <div class="tabs">
-            <button class="tab-btn active" data-tab="search-tab">חיפוש</button>
-            <button class="tab-btn" data-tab="history-tab">היסטוריה</button>
-        </div>
-
-        <div id="search-tab" class="tab-content active">
+        <div id="search-section" class="section">
             <div class="search-form">
                 <div class="form-group">
                     <label for="domain">דומיין *</label>
@@ -52,10 +52,8 @@
                 <p>מחפש נתונים...</p>
             </div>
 
-            <div id="api-key-error" class="error-message hidden">
-                <p>נראה שאין מפתח API תקף. אנא וודא שקובץ .env מכיל מפתח API תקף.</p>
-                <p>צור קובץ .env בתיקיית הפרויקט עם התוכן הבא:</p>
-                <pre>HUNTER_API_KEY=YOUR_API_KEY_HERE</pre>
+            <div id="error-message" class="error-message hidden">
+                <p id="error-text"></p>
             </div>
 
             <div id="results" class="results-container hidden">
@@ -86,11 +84,28 @@
             </div>
         </div>
 
-        <div id="history-tab" class="tab-content">
+        <div id="history-section" class="section hidden">
             <h2>היסטוריית חיפושים</h2>
+            <div class="history-actions">
+                <button id="clear-history-btn" class="secondary-btn">נקה היסטוריה</button>
+            </div>
             <div id="history-container">
                 <p class="loading-history">טוען היסטוריה...</p>
                 <ul id="history-list" class="history-list"></ul>
+            </div>
+        </div>
+
+        <div id="api-info-section" class="section hidden">
+            <h2>מידע על Hunter.io API</h2>
+            <div class="info-box">
+                <h3>איך להשיג מפתח API?</h3>
+                <ol>
+                    <li>הירשם ל-<a href="https://hunter.io/" target="_blank">Hunter.io</a></li>
+                    <li>התחבר לחשבון שלך</li>
+                    <li>גש לדף <a href="https://hunter.io/api-keys" target="_blank">API Keys</a></li>
+                    <li>העתק את המפתח והדבק אותו בטופס למעלה</li>
+                </ol>
+                <p>Hunter.io מציע 25 חיפושים חינם בחודש. לחיפושים נוספים יש לשדרג את החשבון.</p>
             </div>
         </div>
     </div>

@@ -1,13 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // אלמנטים
+    // אלמנטים עיקריים
     const searchBtn = document.getElementById('search-btn');
     const domainInput = document.getElementById('domain');
     const companyInput = document.getElementById('company');
+    const apiKeyInput = document.getElementById('api-key');
+    const saveApiKeyBtn = document.getElementById('save-api-key');
+    const clearHistoryBtn = document.getElementById('clear-history-btn');
     const loadingElem = document.getElementById('loading');
     const resultsElem = document.getElementById('results');
-    const apiKeyErrorElem = document.getElementById('api-key-error');
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
+    const errorMessageElem = document.getElementById('error-message');
+    const errorTextElem = document.getElementById('error-text');
+    
+    // ניווט
+    const searchNav = document.getElementById('search-nav');
+    const historyNav = document.getElementById('history-nav');
+    const apiInfoNav = document.getElementById('api-info-nav');
+    const searchSection = document.getElementById('search-section');
+    const historySection = document.getElementById('history-section');
+    const apiInfoSection = document.getElementById('api-info-section');
     
     // תבניות
     const emailItemTemplate = document.getElementById('email-item-template');
@@ -15,37 +25,126 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // אירועים
     searchBtn.addEventListener('click', handleSearch);
+    saveApiKeyBtn.addEventListener('click', saveApiKey);
+    clearHistoryBtn.addEventListener('click', clearHistory);
     
-    // מעבר בין לשוניות
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabId = btn.dataset.tab;
-            
-            // הסרת הסימון מכל הלשוניות
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
-            
-            // הוספת סימון ללשונית הנוכחית
-            btn.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-            
-            // טעינת היסטוריה אם נלחץ על לשונית ההיסטוריה
-            if (tabId === 'history-tab') {
-                loadHistory();
-            }
-        });
+    // ניווט
+    searchNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection(searchSection);
+        setActiveNavLink(searchNav);
     });
     
-    // פונקציות
+    historyNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection(historySection);
+        setActiveNavLink(historyNav);
+        loadHistory();
+    });
+    
+    apiInfoNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection(apiInfoSection);
+        setActiveNavLink(apiInfoNav);
+    });
+    
+    // פונקציית עזר - הצגת סקשן וההסתרת האחרים
+    function showSection(section) {
+        searchSection.classList.add('hidden');
+        historySection.classList.add('hidden');
+        apiInfoSection.classList.add('hidden');
+        
+        section.classList.remove('hidden');
+    }
+    
+    // פונקציית עזר - הגדרת לינק פעיל בתפריט
+    function setActiveNavLink(link) {
+        searchNav.classList.remove('active');
+        historyNav.classList.remove('active');
+        apiInfoNav.classList.remove('active');
+        
+        link.classList.add('active');
+    }
+    
+    // בעת טעינת הדף, טען את מפתח ה-API מהשרת (אם קיים)
+    fetchApiKey();
+    
+    // פונקציה לטעינת מפתח ה-API מהשרת
+    async function fetchApiKey() {
+        try {
+            const response = await fetch('/get-api-key');
+            const data = await response.json();
+            
+            if (data.api_key) {
+                apiKeyInput.value = data.api_key;
+            }
+        } catch (error) {
+            console.error('שגיאה בטעינת מפתח API:', error);
+        }
+    }
+    
+    // פונקציה לשמירת מפתח ה-API
+    async function saveApiKey() {
+        const apiKey = apiKeyInput.value.trim();
+        
+        if (!apiKey) {
+            showError('אנא הזן מפתח API תקין');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/save-api-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ api_key: apiKey })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                showTemporaryMessage('מפתח API נשמר בהצלחה!', 'success');
+            } else {
+                showError(data.error || 'אירעה שגיאה בשמירת מפתח ה-API');
+            }
+        } catch (error) {
+            showError('אירעה שגיאה בשמירת מפתח ה-API');
+            console.error('Error saving API key:', error);
+        }
+    }
+    
+    // פונקציה להצגת הודעה זמנית
+    function showTemporaryMessage(message, type = 'info') {
+        const alertElem = document.createElement('div');
+        alertElem.className = `alert alert-${type}`;
+        alertElem.textContent = message;
+        
+        // הוספת ההודעה מעל שדה המפתח
+        const apiKeySection = document.getElementById('api-key-section');
+        apiKeySection.insertBefore(alertElem, apiKeySection.firstChild);
+        
+        // הסרת ההודעה אחרי 3 שניות
+        setTimeout(() => {
+            alertElem.remove();
+        }, 3000);
+    }
     
     // חיפוש באמצעות API
     async function handleSearch() {
         const domain = domainInput.value.trim();
         const company = companyInput.value.trim();
+        const apiKey = apiKeyInput.value.trim();
         
         if (!domain) {
-            alert('אנא הזן דומיין לחיפוש');
+            showError('אנא הזן דומיין לחיפוש');
             domainInput.focus();
+            return;
+        }
+        
+        if (!apiKey) {
+            showError('אנא הזן מפתח API מ-Hunter.io');
+            apiKeyInput.focus();
             return;
         }
         
@@ -53,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // הצגת אנימציית טעינה
             loadingElem.classList.remove('hidden');
             resultsElem.classList.add('hidden');
-            apiKeyErrorElem.classList.add('hidden');
+            errorMessageElem.classList.add('hidden');
             
             // שליחת בקשה לשרת
             const response = await fetch('/search', {
@@ -61,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ domain, company })
+                body: JSON.stringify({ domain, company, api_key: apiKey })
             });
             
             const data = await response.json();
@@ -72,24 +171,30 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 displayResults(data);
             } else {
-                // בדיקה אם השגיאה היא בגלל מפתח API חסר
-                if (data.error && data.error.includes('API')) {
-                    apiKeyErrorElem.classList.remove('hidden');
-                } else {
-                    alert(`שגיאה: ${data.error || 'אירעה שגיאה בלתי צפויה'}`);
-                }
+                showError(data.error || 'אירעה שגיאה בעת ביצוע החיפוש');
             }
         } catch (error) {
             loadingElem.classList.add('hidden');
-            alert('אירעה שגיאה בעת ביצוע החיפוש');
+            showError('אירעה שגיאה בעת ביצוע החיפוש');
             console.error('Error during search:', error);
         }
+    }
+    
+    // הצגת הודעת שגיאה
+    function showError(message) {
+        errorTextElem.textContent = message;
+        errorMessageElem.classList.remove('hidden');
+        
+        // הסתרת ההודעה אחרי 5 שניות
+        setTimeout(() => {
+            errorMessageElem.classList.add('hidden');
+        }, 5000);
     }
     
     // הצגת תוצאות החיפוש
     function displayResults(data) {
         if (!data.data) {
-            alert('לא התקבלו תוצאות תקינות מהשרת');
+            showError('לא התקבלו תוצאות תקינות מהשרת');
             return;
         }
         
@@ -110,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 emailsList.appendChild(emailItem);
             });
         } else {
-            emailsList.innerHTML = '<p>לא נמצאו כתובות אימייל</p>';
+            emailsList.innerHTML = '<p>לא נמצאו כתובות אימייל אמיתיות</p>';
         }
         
         // הצגת התוצאות
@@ -141,6 +246,24 @@ document.addEventListener('DOMContentLoaded', () => {
         template.querySelector('.confidence-value').textContent = `${confidence}%`;
         
         return template;
+    }
+    
+    // ניקוי היסטוריית חיפושים
+    async function clearHistory() {
+        try {
+            const response = await fetch('/clear-history', {
+                method: 'POST'
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                // טעינת היסטוריה מחדש (שתהיה ריקה)
+                loadHistory();
+            }
+        } catch (error) {
+            console.error('Error clearing history:', error);
+        }
     }
     
     // טעינת היסטוריית חיפושים
@@ -188,11 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
             displayResults(item.results);
             
             // מעבר ללשונית החיפוש
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
-            
-            document.querySelector('[data-tab="search-tab"]').classList.add('active');
-            document.getElementById('search-tab').classList.add('active');
+            showSection(searchSection);
+            setActiveNavLink(searchNav);
             
             // גלילה לתוצאות
             resultsElem.scrollIntoView({ behavior: 'smooth' });
