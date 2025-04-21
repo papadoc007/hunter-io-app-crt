@@ -1,17 +1,8 @@
-from flask import Flask, Response
-import sys
-import os
+from http.server import BaseHTTPRequestHandler
 
-# הוספת תיקיית הפרויקט ל-path כדי שהיבוא יעבוד
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# ייבוא של אפליקציית Flask שלנו
-from app import app
-
-# הפונקציה שתקרא על ידי Vercel
-def handler(request):
-    """Handle a request to the Flask app."""
-    return Response(
-        app(request.environ, lambda status, headers, exc_info: []),
-        status=200,
-    ) 
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write('Hello from Python on Vercel!'.encode()) 
