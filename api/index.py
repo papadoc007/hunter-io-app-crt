@@ -156,14 +156,23 @@ def health_check():
     """
     return jsonify({'status': 'ok'}), 200
 
+# נתיב ראשי לדף הבית - מחזיר הודעת ברוכים הבאים פשוטה
+@app.route('/')
+def index():
+    return jsonify({
+        "message": "ברוכים הבאים ל-Hunter.io Email Search API",
+        "status": "פעיל",
+        "endpoints": [
+            "/api/login",
+            "/api/search",
+            "/api/history",
+            "/api/health"
+        ]
+    })
+
 # קוד להרצה מקומית
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True)
 
-# Vercel serverless function handler
-def handler(request, context):
-    """
-    פונקציית Handler לסביבת Vercel Serverless Functions
-    """
-    with app.request_context(request.environ):
-        return app(request.environ, lambda status, headers: [status, headers]) 
+# נקודת הכניסה עבור Vercel
+handler = app 
