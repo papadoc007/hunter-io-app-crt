@@ -1,16 +1,9 @@
-from flask import Flask
+from http.server import BaseHTTPRequestHandler
 
-# יצירת אפליקציית Flask פשוטה
-app = Flask(__name__)
-
-@app.route('/', defaults={"path": ""})
-@app.route('/<path:path>')
-def catch_all(path):
-    return "האפליקציה של Hunter.io עובדת!"
-
-# Vercel Serverless Function Handler
-def handler(request, response):
-    response.status_code = 200
-    response.set_header("Content-Type", "text/html; charset=utf-8")
-    response.body = "האפליקציה של Hunter.io עובדת!"
-    return response 
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain; charset=utf-8')
+        self.end_headers()
+        self.wfile.write('האפליקציה של Hunter.io עובדת!'.encode('utf-8'))
+        return 
